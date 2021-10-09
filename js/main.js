@@ -26,26 +26,26 @@ var myMap = function() {
 	markerList = [];
 
 	/*
-		Load markers onto the Google Map from a provided array or demo personData (data.js)
-		@param array personList [optional] (list of people to load)
+		Load markers onto the Google Map from a provided array or demo GardensData (data.js)
+		@param array GardensList [optional] (list of people to load)
 		@return undefined
 	*/
-	function loadMarkers(personList) {
+	function loadMarkers(GardensList) {
 
-		// optional argument of person
-		var people = ( typeof personList !== 'undefined' ) ? personList : personData;
+		// optional argument of Gardens
+		var people = ( typeof GardensList !== 'undefined' ) ? GardensList : GardensData;
 
 		var j = 1; // for lorempixel
 
 		for( i=0; i < people.length; i++ ) {
-			var person = people[i];
+			var Gardens = people[i];
 
 			// if its already on the map, dont put it there again
-			if( markerList.indexOf(person.id) !== -1 ) continue;
+			if( markerList.indexOf(Gardens.id) !== -1 ) continue;
 
-			var lat = person.lat,
-				lng = person.lng,
-				markerId = person.id;
+			var lat = Gardens.lat,
+				lng = Gardens.lng,
+				markerId = Gardens.id;
 
 			var infoWindow = new google.maps.InfoWindow({
 				maxWidth: 400
@@ -53,20 +53,20 @@ var myMap = function() {
 
 			var marker = new google.maps.Marker({
 				position: new google.maps.LatLng( lat, lng ),
-				title: person.name,
+				title: Gardens.name,
 				markerId: markerId,
 				icon: markerLocation,
 				map: map
 			});
 
 			markers[markerId] = marker;
-			markerList.push(person.id);
+			markerList.push(Gardens.id);
 
-			if( j > 10 ) j = 1; // for lorempixel, the thumbnail image
+			if( j > 10 ) j = 1; // for lorempixel, the thumbnail imlocation
 			var content = ['<div class="iw"><img src="http://lorempixel.com/90/90/people/',
-				j, '" width="90" height="90">', '<div class="iw-text"><strong>', person.name,
-				'</strong><br>Age: ', person.age, '<br>Followers: ', person.followers,
-				'<br>cat: ', person.cat, '</div></div>'].join('');
+				j, '" width="90" height="90">', '<div class="iw-text"><strong>', Gardens.name,
+				'</strong><br>location: ', Gardens.location, '<br>address: ', Gardens.address,
+				'<br>telephone: ', Gardens.telephone, '</div></div>'].join('');
 			j++; // lorempixel
 			
 			google.maps.event.addListener(marker, 'click', (function (marker, content) {
@@ -83,7 +83,7 @@ var myMap = function() {
 		@param int id (id of the marker element)
 		@return undefined
 	*/
-	function removePersonMarker(id) {
+	function removeGardensMarker(id) {
 		if( markers[id] ) {
 			markers[id].setMap(null);
 			loc = markerList.indexOf(id);
@@ -100,8 +100,8 @@ var myMap = function() {
 
 	// default all filters off
 	var filter = {
-		followers: 0,
-		cat: 0,
+		address: 0,
+		telephone: 0,
 		from: 0
 	}
 	var filterMap;
@@ -160,7 +160,7 @@ var myMap = function() {
 			}
 		}
 
-		if( filter[filterType] === 0 ) results.push( personData );
+		if( filter[filterType] === 0 ) results.push( GardensData );
 		
 		/*
 			if there is 1 array (1 filter applied) set it,
@@ -180,13 +180,13 @@ var myMap = function() {
 		The keys in this need to be mapped 1-to-1 with the keys in the filter variable.
 	*/
 	filterMap = {
-		followers: function( value ) {
-			return filterIntsLessThan('followers', value);
+		address: function( value ) {
+			return filterIntsLessThan('address', value);
 		},
 		
-		cat: function( value ) {
-			return filterByString('cat', value);
-		},
+		// telephone: function( value ) {
+		// 	return filterByString('telephone', value);
+		// },
 
 		from: function( value ) {
 			return filterByString('from', value);
@@ -202,12 +202,12 @@ var myMap = function() {
 	function filterByString( dataProperty, value ) {
 		var people = [];
 
-		for( var i=0; i < personData.length; i++ ) {
-			var person = personData[i];
-			if( person[dataProperty] == value ) {
-				people.push( person );
+		for( var i=0; i < GardensData.length; i++ ) {
+			var Gardens = GardensData[i];
+			if( Gardens[dataProperty] == value ) {
+				people.push( Gardens );
 			} else {
-				removePersonMarker( person.id );
+				removeGardensMarker( Gardens.id );
 			}
 		}
 		return people;
@@ -222,12 +222,12 @@ var myMap = function() {
 	function filterIntsLessThan( dataProperty, value ) {
 			var people = [];
 
-			for( var i=0; i < personData.length; i++ ) {
-				var person = personData[i];
-				if( person[dataProperty] > value ) {
-					people.push( person )
+			for( var i=0; i < GardensData.length; i++ ) {
+				var Gardens = GardensData[i];
+				if( Gardens[dataProperty] > value ) {
+					people.push( Gardens )
 				} else {
-					removePersonMarker( person.id );
+					removeGardensMarker( Gardens.id );
 				}
 			}
 			return people;
@@ -236,8 +236,8 @@ var myMap = function() {
 	// Takes all the filters off
 	function resetFilter() {
 		filter = {
-			followers: 0,
-			cat: 0,
+			address: 0,
+			
 			from: 0
 		}
 	}
@@ -272,13 +272,13 @@ $(function() {
 		}
 	});
 
-	$('.followers-select').on('change', function() {
-		myMap.filterCtrl('followers', this.value);
+	$('.address-select').on('change', function() {
+		myMap.filterCtrl('address', this.value);
 	});
 
-	$('.cat-select').on('change', function() {
-		myMap.filterCtrl('cat', this.value);
-	});
+	// $('.telephone-select').on('change', function() {
+	// 	myMap.filterCtrl('telephone', this.value);
+	// });
 
 	$('.from-select').on('change', function() {
 		myMap.filterCtrl('from', this.value);
